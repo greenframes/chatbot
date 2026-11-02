@@ -3763,7 +3763,7 @@ class WPCA_Chat_Service
         }
 
         // Ansprechpartner / Kontaktperson / "wer ist zustaendig"
-        if ($this->text_matches_patterns($text, array('ansprechpartner', 'ansprechpartnerin', 'ansprechperson', 'zustaendig', 'wer ist zustandig', 'wer ist verantwortlich', 'wer hilft', 'wer kann helfen', 'wer ist da', 'wen kann ich fragen', 'wen soll ich kontaktieren', 'wer bearbeitet', 'wer kuemmert', 'kontaktperson', 'who is responsible', 'who should i contact', 'who can help', 'dame mit der nummer', 'herr', 'frau'), false)) {
+        if ($this->text_matches_patterns($text, array('ansprechpartner', 'ansprechpartnerin', 'ansprechperson', 'zustaendig', 'wer ist zustandig', 'wer ist verantwortlich', 'wer hilft', 'wer kann helfen', 'wer ist da', 'wen kann ich fragen', 'wen soll ich kontaktieren', 'wer bearbeitet', 'wer kuemmert', 'kontaktperson', 'who is responsible', 'who should i contact', 'who can help', 'dame mit der nummer'), false)) {
             $answer = $this->phrase(
                 $reply_language,
                 'Fuer alle Fragen rund um Ausbildung, Bewerbung und Kurse erreichst du unser Team direkt ueber das Kontaktformular auf der Website oder telefonisch. Die passenden Kontaktdaten findest du hier.',
