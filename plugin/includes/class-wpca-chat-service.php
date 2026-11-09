@@ -3705,92 +3705,24 @@ class WPCA_Chat_Service
         // (Keyword-Direktrouter entfernt — OpenAI soll Ausbildungsanfragen mit
         //  echtem Seiteninhalt beantworten statt statischer Platzhalterphrases)
 
-        // Quereinsteiger → Betreuungskraft (spezifisch)
-        if ($this->text_matches_patterns($text, array('quereinsteiger', 'quereinstieg', 'berufswechsel', 'umsteiger', 'kein pflege', 'keine pflege', 'keine ausbildung', 'ohne ausbildung', 'ohne pflegeausbildung'), false)
-            && $this->text_matches_patterns($text, array('betreuungskraft', 'alltagsbegleiter', 'alltagsbegleiterin', '43b', 'betreuung'), false)) {
-            $answer = $this->phrase(
-                $reply_language,
-                'Ja, als Quereinsteiger kannst du die Qualifizierung zur Betreuungskraft nach Par. 43b SGB XI machen — dafuer ist keine Pflegevorausbildung erforderlich. Die Qualifizierung dauert in der Regel einige Wochen und vermittelt die notwendigen Kenntnisse fuer die Arbeit als Betreuungskraft in der Pflege. Alle Infos zur Qualifizierung findest du hier.',
-                'Yes, as a career changer you can complete the Betreuungskraft qualification under § 43b SGB XI — no prior nursing qualification is required. The training usually takes a few weeks and provides the knowledge needed to work as a care assistant. All details about the qualification are here.'
-            );
-            return $this->intent_result($answer, $betreuungskraft_sources, 1.5);
-        }
-
-        // Quereinsteiger / Berufserfahrung / Anerkennung (allgemein)
-        if ($this->text_matches_patterns($text, array('berufserfahrung', 'quereinsteiger', 'quereinstieg', 'anerkennung', 'anerkannt', 'anerkennnung', 'vorher gearbeitet', 'schon gearbeitet', 'bereits gearbeitet', 'abschluss in', 'studium', 'examen', 'fachangestellte', 'medizinische fachangestellte', 'krankenschwester', 'muss ich trotzdem', 'muss ich noch', 'muss ich die', 'brauche ich noch die ausbildung', 'ausbildung noch machen', 'vollausbildung'), false) && $this->is_training_or_application_request($text)) {
-            $answer = $this->phrase(
-                $reply_language,
-                'Das kommt auf deine bisherige Qualifikation und ob sie in Deutschland anerkannt ist an. Vorerfahrungen aus medizinischen oder pflegerischen Berufen koennen je nach Fall beruecksichtigt werden, befreien aber in der Regel nicht vollstaendig von der Ausbildung. Fuer eine individuelle Einschaetzung wende dich bitte direkt an unser Team — am schnellsten ueber das Kontaktformular oder per Telefon.',
-                'This depends on your existing qualification and whether it is recognised in Germany. Prior experience in medical or care professions can be taken into account in some cases, but does not generally exempt you from the full training. For an individual assessment, please contact our team directly — fastest via the contact form or by phone.'
-            );
-            return $this->intent_result($answer, $contact_sources, 1.4);
-        }
-
-        // Freie Plätze / Verfügbarkeit
-        if ($this->text_matches_patterns($text, array('freie plaetze', 'freie platze', 'noch plaetze', 'noch platze', 'platze frei', 'platze noch frei', 'freier platz', 'platz frei', 'noch platz', 'available spots', 'free spots', 'available places', 'places left', 'spots left'), false)) {
-            $answer = $this->phrase(
-                $reply_language,
-                'Die aktuell verfuegbaren Plaetze aendern sich laufend durch Zu- und Absagen, daher kann ich dir hier keine verbindliche Zahl nennen. Ruf am besten direkt bei uns an — das Team kann dir sofort sagen, ob und fuer welche Ausbildung noch Plaetze frei sind.',
-                'Available places change frequently due to sign-ups and cancellations, so I cannot give you a reliable number here. Please call us directly — the team can tell you straight away whether places are still available.'
-            );
-            $answer_sources = $this->merge_answer_sources($pflegeschule_sources, $contact_sources);
-
-            return $this->intent_result($answer, $answer_sources, 1.3);
-        }
-
-        // Teilzeit-Ausbildung
-        if ($this->text_matches_patterns($text, array('teilzeit', 'part time', 'part-time', 'halbzeit', 'halbtags', 'halbtag', 'halbe stelle', 'reduziert', 'weniger stunden'), false) && $this->is_training_or_application_request($text)) {
-            $answer = $this->phrase(
-                $reply_language,
-                'Ob die Ausbildung in Teilzeit moeglich ist, muss fuer deinen konkreten Wunsch direkt mit der Schule abgeklaert werden — gesetzlich gibt es unter bestimmten Voraussetzungen eine Teilzeitoption, aber die Umsetzung haengt vom Einzelfall ab. Wende dich am besten ueber das Kontaktformular an das Team.',
-                'Whether training is possible on a part-time basis needs to be clarified directly with the school for your specific situation — legally there is a part-time option under certain conditions, but implementation depends on the individual case. Please contact the team via the contact form.'
-            );
-            return $this->intent_result($answer, $this->merge_answer_sources($pflegeschule_sources, $contact_sources), 1.3);
-        }
-
-        // Online-Ausbildung / Fernstudium (nicht: Deutschkurs online oder Sprachkurs)
-        if ($this->text_matches_patterns($text, array('online', 'fernunterricht', 'fernstudium', 'digital', 'remote', 'distance', 'zuhause', 'von zuhause', 'von zu hause'), false)
-            && ! $this->text_matches_patterns($text, array('deutsch lernen', 'deutschkurs', 'sprachkurs', 'deutschunterricht', 'sprachunterricht', 'deutsch online', 'online deutsch', 'b1', 'b2', 'a1', 'a2', 'c1', 'c2', 'deutschkenntnisse', 'sprachkenntnisse'), false)
-            && $this->is_training_or_application_request($text)) {
-            $answer = $this->phrase(
-                $reply_language,
-                'Die Ausbildungen bei uns finden in Praesenz statt — Unterricht an der Pflegeschule und praktische Einsaetze in Pflegeeinrichtungen. Eine rein online oder per Fernstudium absolvierbare Pflegeausbildung gibt es bei uns nicht. Details zur Ausbildung findest du hier.',
-                'Our training programmes are in-person — classes at the nursing school and practical placements in care facilities. A purely online or distance-learning nursing qualification is not available. You can find details about the programme here.'
-            );
-            $answer_sources = $this->merge_answer_sources($pflegeschule_sources, $contact_sources);
-
-            return $this->intent_result($answer, $answer_sources, 1.3);
-        }
-
-        // Bewerbungsbestaetigung / Rueckmeldung nach Bewerbung
-        if ($this->text_matches_patterns($text, array('beworben'), false) && $this->text_matches_patterns($text, array('email', 'e-mail', 'mail', 'bestaetigung', 'bestätigung', 'rueckmeldung', 'rückmeldung', 'antwort', 'erhalte', 'erhalt', 'wie lange', 'wann melde', 'wann erhalte'), false)) {
-            $answer = $this->phrase(
-                $reply_language,
-                'Nach einer eingegangenen Bewerbung meldet sich das Team so bald wie moeglich bei dir. Die Rueckmeldung erfolgt in der Regel per E-Mail oder telefonisch. Falls du laenger als erwartet nichts gehoert hast, kannst du gern ueber das Kontaktformular nachfragen.',
-                'After receiving your application, the team will get back to you as soon as possible. Feedback is usually given by email or phone. If you have not heard back after longer than expected, please follow up through the contact form.'
-            );
-
-            return $this->intent_result($answer, $contact_sources, 1.2);
-        }
-
         // Kontaktnummer / Telefon direkt anfragen
-        if ($this->text_matches_patterns($text, array('telefon', 'telefonnummer', 'nummer', 'anrufen', 'call', 'phone', 'tel.', 'handynummer', 'mobilnummer', 'whatsapp'), false)) {
+        if ($this->text_matches_patterns($text, array('telefon', 'telefonnummer', 'anrufen', 'call', 'phone', 'handynummer', 'mobilnummer', 'whatsapp'), false)) {
             $answer = $this->phrase(
                 $reply_language,
-                'Die Telefonnummer und alle weiteren Kontaktdaten findest du direkt auf unserer Kontaktseite.',
-                'You can find the phone number and all other contact details directly on our contact page.'
+                'Die Telefonnummer und alle Kontaktdaten findest du direkt auf unserer Kontaktseite.',
+                'You can find the phone number and all contact details directly on our contact page.'
             );
             return $this->intent_result($answer, $contact_sources, 1.4);
         }
 
-        // Ansprechpartner / Kontaktperson / "wer ist zustaendig"
-        if ($this->text_matches_patterns($text, array('ansprechpartner', 'ansprechpartnerin', 'ansprechperson', 'zustaendig', 'wer ist zustandig', 'wer ist verantwortlich', 'wer hilft', 'wer kann helfen', 'wer ist da', 'wen kann ich fragen', 'wen soll ich kontaktieren', 'wer bearbeitet', 'wer kuemmert', 'kontaktperson', 'who is responsible', 'who should i contact', 'who can help', 'dame mit der nummer'), false)) {
+        // Ansprechpartner / Kontaktperson
+        if ($this->text_matches_patterns($text, array('ansprechpartner', 'ansprechpartnerin', 'ansprechperson', 'zustaendig', 'wer ist zustandig', 'wer ist verantwortlich', 'wer hilft', 'wer kann helfen', 'wer ist da', 'wen kann ich fragen', 'wen soll ich kontaktieren', 'wer bearbeitet', 'wer kuemmert', 'kontaktperson', 'who is responsible', 'who should i contact', 'who can help'), false)) {
             $answer = $this->phrase(
                 $reply_language,
                 'Fuer alle Fragen rund um Ausbildung, Bewerbung und Kurse erreichst du unser Team direkt telefonisch oder ueber das Kontaktformular. Die Nummer und alle Kontaktdaten findest du hier.',
                 'For all questions about training, applications and courses you can reach our team by phone or via the contact form. The number and all contact details are here.'
             );
-            return $this->intent_result($answer, $contact_sources, 1.5);
+            return $this->intent_result($answer, $contact_sources, 1.4);
         }
 
         // Auslaender / auslaendisch / Zugaenglichkeit fuer Auslaender (ohne spezifischen Auslandsbezug im Intent)
@@ -3816,207 +3748,14 @@ class WPCA_Chat_Service
             return $this->intent_result($answer, $room_sources, 1.4);
         }
 
-        // Schulabschluss-Voraussetzungen (ESA / Erster Schulabschluss / Hauptschule allgemein)
-        if ($this->text_matches_patterns($text, array('esa', 'erster schulabschluss', 'ersten schulabschluss', 'hauptschulabschluss', 'hauptschule', 'schulabschluss', 'realschulabschluss', 'abitur', 'fachhochschulreife', 'mittlerer abschluss'), false) && $this->is_training_or_application_request($text)) {
-            $is_fachkraft = $this->text_matches_patterns($text, array('pflegefachfrau', 'pflegefachmann', 'pflegefachkraft', '3 jahr', 'drei jahr', 'dreijaehrig'), false);
-            $is_assistenz = $this->text_matches_patterns($text, array('pflegefachassistenz', 'pflegeassistenz', 'pflegeassistentin', 'pflegefachassistent', 'pflegehelfer', '1 jahr', 'einjaehrig'), false);
-
-            if ($is_fachkraft) {
-                $sources = $pflegefachkraft_sources;
-                $answer = $this->phrase(
-                    $reply_language,
-                    'Fuer die 3-jaehrige Ausbildung zur Pflegefachkraft ist mindestens ein Hauptschulabschluss der Klasse 10 erforderlich. Alternativ gilt: Hauptschulabschluss Klasse 9 plus erfolgreich abgeschlossene 1-jaehrige Pflegefachassistenz. Ein ESA (Erster Schulabschluss / Klasse 9) allein reicht in der Regel nicht direkt fuer die Pflegefachkraft-Ausbildung. Details findest du auf der Ausbildungsseite.',
-                    'For the 3-year nursing qualification (Pflegefachkraft), at least a Hauptschulabschluss after class 10 is required. Alternatively: class 9 certificate plus a completed 1-year nursing assistant qualification. A class 9 certificate alone is generally not sufficient for direct entry into the 3-year programme. Details are on the training page.'
-                );
-            } elseif ($is_assistenz) {
-                $sources = $pflegeassistenz_sources;
-                $answer = $this->phrase(
-                    $reply_language,
-                    'Fuer die 1-jaehrige Pflegefachassistenz sind die genauen Zugangsvoraussetzungen auf der Ausbildungsseite hinterlegt. Ob ein ESA (Erster Schulabschluss) ausreicht, haengt vom Einzelfall ab — bitte frag direkt ueber das Kontaktformular nach, damit das Team das fuer dich pruefen kann.',
-                    'For the 1-year nursing assistant programme, the exact entry requirements are listed on the training page. Whether a class 9 certificate (ESA) is sufficient depends on the individual case — please ask through the contact form so the team can check this for you.'
-                );
-            } else {
-                $sources = $this->merge_answer_sources($pflegeschule_sources, $contact_sources);
-                $answer = $this->phrase(
-                    $reply_language,
-                    'Welcher Schulabschluss benoetigt wird, haengt von der gewuenschten Ausbildung ab. Fuer die 3-jaehrige Pflegefachkraft ist mindestens Hauptschulabschluss Klasse 10 erforderlich; fuer die 1-jaehrige Pflegefachassistenz stehen die Details auf der jeweiligen Ausbildungsseite. Bei einem ESA (Klasse 9) empfehle ich, direkt anzufragen — das Team klaert das individuell.',
-                    'The required qualification depends on which training programme you choose. For the 3-year nursing qualification at least a class 10 certificate is needed; for the 1-year assistant programme the details are on the respective training page. With a class 9 certificate (ESA) I recommend asking directly — the team will clarify this individually.'
-                );
-            }
-
-            return $this->intent_result($answer, $sources, 1.3);
-        }
-
-        if ($this->is_minijob_during_training_question($text)) {
-            $sources = $this->merge_answer_sources($pflegeschule_sources, $contact_sources);
-            $answer = $this->phrase(
-                $reply_language,
-                'Zu einem Minijob neben der Ausbildung habe ich keine verbindliche Einzelfallregel in den hinterlegten Informationen. Bitte stimme einen Nebenjob vorher mit Ausbildungsbetrieb/Traeger und Schule ab; wichtig ist, dass Unterricht, Praxis und die Ausbildungszeiten nicht beeintraechtigt werden.',
-                'I do not have a binding individual rule in the stored information about having a mini-job alongside training. Please coordinate any side job with the training provider/employer and the school first; lessons, practical training and training hours must not be affected.'
-            );
-
-            return $this->intent_result($answer, $sources, 1.35);
-        }
-
-        if ($this->text_matches_patterns($text, array('email adresse', 'e mail adresse', 'mail adresse', 'email von der schule', 'e mail von der schule'), false)) {
-            $answer = $this->phrase(
-                $reply_language,
-                'Die verlaessliche Kontaktmoeglichkeit findest du auf der Kontaktseite der Schule. Dort steht der aktuell gepflegte Kontaktweg.',
-                'The reliable contact option is on the school contact page. That page contains the current contact route.'
-            );
-
-            return $this->intent_result($answer, $contact_sources, 1.2);
-        }
-
-        if ($this->text_matches_patterns($text, array('fsj', 'freiwilliges soziales jahr'), false)) {
-            $answer = $this->phrase(
-                $reply_language,
-                'Zu FSJ-Stellen oder FSJ-Programmen habe ich in den hinterlegten Informationen keinen sicheren Eintrag. Bitte frage dazu direkt ueber das Kontaktformular nach, damit das Team die aktuelle Lage fuer 2026 pruefen kann.',
-                'I do not have a reliable entry for FSJ positions or FSJ programmes in the stored information. Please ask through the contact form so the team can check the current situation for 2026.'
-            );
-
-            return $this->intent_result($answer, $contact_sources, 1.1);
-        }
-
-        if ($this->text_matches_patterns($text, array('bewertungsfrist', 'bewertungsfristen'), false)) {
-            $answer = $this->phrase(
-                $reply_language,
-                'Zu Bewertungsfristen finde ich gerade keinen sicheren Eintrag auf den passenden Seiten. Bitte nutze dafuer das Kontaktformular, damit du keine falsche Frist genannt bekommst.',
-                'I cannot find a reliable entry for assessment deadlines on the matching pages right now. Please use the contact form so you do not receive an incorrect deadline.'
-            );
-
-            return $this->intent_result($answer, $contact_sources, 1.1);
-        }
-
-        if ($this->text_matches_patterns($text, array('arbeitsentgeltzuschuss', 'entgeltzuschuss', 'foerderung arbeitsentgelt', 'förderung arbeitsentgelt'), false)) {
-            $sources = $this->merge_answer_sources($bildung_sources, $contact_sources);
-            $answer = $this->phrase(
-                $reply_language,
-                'Zum Arbeitsentgeltzuschuss kann ich hier keine verbindliche Einzelfallauskunft geben. Fuer Foerder- oder Kostenthemen ist der direkte Kontakt der richtige Weg; fuer passende Qualifizierungen kannst du zusaetzlich die Kursuebersicht nutzen.',
-                'I cannot give a binding individual answer about wage subsidies here. For funding or cost questions, direct contact is the right route; for matching qualifications, you can also use the course overview.'
-            );
-
-            return $this->intent_result($answer, $sources, 1.1);
-        }
-
-        if ($this->text_matches_patterns($text, array('praeventionskurs', 'präventionskurs', 'preventionskurs', 'rueckenschule', 'rückenschule', 'ruecken', 'rücken'), false)) {
-            $sources = $this->merge_answer_sources($bildung_sources, $contact_sources);
-            $answer = $this->phrase(
-                $reply_language,
-                'Zu Praeventionskursen, Rueckenschule oder kleinen Ruecken-Schulungen finde ich keinen eindeutigen eigenen Kurseintrag. Am besten nutzt du die Kursuebersicht Bildung & Karriere oder fragst den konkreten Bedarf direkt ueber das Kontaktformular an.',
-                'I cannot find a clear dedicated course entry for prevention courses, back-school training or small back-care sessions. Please use the education and career course overview or ask about the concrete need through the contact form.'
-            );
-
-            return $this->intent_result($answer, $sources, 1.15);
-        }
-
-        if ($this->text_matches_patterns($text, array('externpruefung', 'externprüfung'), false)) {
-            $sources = $this->merge_answer_sources($bildung_sources, $contact_sources);
-            $answer = $this->phrase(
-                $reply_language,
-                'Zur Externpruefung finde ich keinen sicheren eigenen Kurseintrag. Wenn du viel Pflegeerfahrung hast, frage bitte direkt ueber das Kontaktformular nach, welche Anerkennungs- oder Qualifizierungswege fuer dich passen.',
-                'I cannot find a reliable dedicated entry for an external examination. If you have substantial care experience, please ask through the contact form which recognition or qualification route fits your situation.'
-            );
-
-            return $this->intent_result($answer, $sources, 1.15);
-        }
-
-        if ($this->text_matches_patterns($text, array('traeger selber aussuchen', 'träger selber aussuchen', 'traeger selbst aussuchen', 'träger selbst aussuchen', 'mit welchen traegern', 'mit welchen trägern', 'welche traeger', 'welche träger'), false)) {
-            $sources = $this->merge_answer_sources($pflegeschule_sources, $contact_sources);
-            $answer = $this->phrase(
-                $reply_language,
-                'Zur Auswahl oder Liste der Traeger kann ich hier keine verbindliche Aussage machen. Fuer die Pflegeausbildung ist die Schule der richtige Ansprechpartner; dort bekommst du die aktuelle Auskunft, ob du einen Traeger selbst einbringen kannst und mit welchen Partnern gearbeitet wird.',
-                'I cannot give a binding answer here about choosing or listing training providers. For nursing training, the school is the right contact; they can tell you whether you can bring your own provider and which partners are currently involved.'
-            );
-
-            return $this->intent_result($answer, $sources, 1.2);
-        }
-
-        if ($this->text_matches_patterns($text, array('mittagspause', 'pausenzeiten', 'betreuung meines kindes', 'betreuung kind', 'kinderbetreuung'), false) && $this->text_matches_patterns($text, array('kurs', 'unterricht', 'schule', 'ausbildung', 'witten'), false)) {
-            $answer = $this->phrase(
-                $reply_language,
-                'Konkrete Pausenzeiten fuer einen Kurs in Witten kann ich nicht sicher aus den hinterlegten Informationen nennen. Bitte frage direkt ueber das Kontaktformular mit dem Kursnamen nach, damit du die Kinderbetreuung verlaesslich planen kannst.',
-                'I cannot reliably state the exact break times for a course in Witten from the stored information. Please ask through the contact form with the course name so you can plan childcare reliably.'
-            );
-
-            return $this->intent_result($answer, $contact_sources, 1.1);
-        }
-
-        if ($this->is_recognition_or_document_timing_question($text)) {
-            $sources = $this->merge_answer_sources($international_sources, $contact_sources);
-            $answer = $this->phrase(
-                $reply_language,
-                'Eine verbindliche Zusage zur Anerkennung von Abschluessen oder dazu, ob beglaubigte Uebersetzungen vorerst ausreichen, kann ich hier nicht geben. Wenn du dich aus dem Ausland bewirbst, ist AschkeCare-Connect der passende Einstieg; reiche deine vorhandenen Unterlagen dort ein oder frage direkt nach, welche Nachweise wann benoetigt werden.',
-                'I cannot give a binding decision here on recognition of qualifications or whether certified translations are sufficient at first. If you apply from abroad, AschkeCare-Connect is the right starting point; submit the documents you already have there or ask directly which documents are needed and when.'
-            );
-
-            return $this->intent_result($answer, $sources, 1.35);
-        }
-
-        if ($this->is_language_certificate_timing_question($text)) {
-            $sources = $this->merge_answer_sources($pflegeschule_sources, $contact_sources);
-            $answer = $this->phrase(
-                $reply_language,
-                'Ob du das B2-Zertifikat nachreichen kannst, muss die Schule fuer deine konkrete Bewerbung bestaetigen. Du kannst die Bewerbung mit dem Hinweis auf den Pruefungstermin starten und direkt nachfragen, bis wann das Zertifikat vorliegen muss.',
-                'Whether you can submit the B2 certificate later has to be confirmed by the school for your specific application. You can start the application with a note about the exam date and ask directly by when the certificate must be available.'
-            );
-
-            return $this->intent_result($answer, $sources, 1.25);
-        }
-
-        if ($this->is_language_course_or_certificate_question($text)) {
-            $sources = $this->merge_answer_sources($international_sources, $pflegeschule_sources, $contact_sources);
-            $answer = $this->phrase(
-                $reply_language,
-                'Ob du dich schon mit Grundkenntnissen bewerben kannst und das Sprachzertifikat spaeter nachreichst, muss fuer den konkreten Kurs bestaetigt werden. Wenn du dich aus dem Ausland bewirbst, nutze AschkeCare-Connect; dort passt die Frage zu Sprache, Bewerbung und naechsten Schritten am besten.',
-                'Whether you can apply with basic German and submit the language certificate later has to be confirmed for the specific course. If you apply from abroad, please use AschkeCare-Connect; that is the best route for questions about language, application and next steps.'
-            );
-
-            return $this->intent_result($answer, $sources, 1.25);
-        }
-
-        if ($this->is_course_payment_question($text)) {
-            $sources = $this->merge_answer_sources($this->pick_training_sources_for_query($text), $contact_sources);
-            $answer = $this->phrase(
-                $reply_language,
-                'Ob du waehrend dieses konkreten Kurses eine Verguetung bekommst, kann ich aus den hinterlegten Informationen nicht sicher zusagen. Bitte pruefe die passende Kursseite und frage fuer deinen Kurs direkt nach.',
-                'I cannot reliably confirm from the stored information whether you receive payment during this specific course. Please check the matching course page and ask directly for your course.'
-            );
-
-            return $this->intent_result($answer, $sources, 1.15);
-        }
-
-        if ($this->is_open_place_or_start_availability_question($text)) {
-            $sources = $this->merge_answer_sources(
-                $this->pick_training_sources_for_query($text),
-                $this->is_nursing_training_from_abroad_question($text) ? $international_sources : array(),
-                $contact_sources
-            );
-            if ($this->is_nursing_assistant_training_question($text)) {
-                $answer = $this->phrase(
-                    $reply_language,
-                    'Fuer Pflegehelfer beziehungsweise Nursing Assistant passt am ehesten die 1-jaehrige Pflegefachassistenz. Ob fuer 2026 noch ein Platz frei ist, kann ich nicht live pruefen; die Ausbildungsseite ist der beste Einstieg, fuer eine verbindliche Platz-Auskunft frage bitte direkt nach.',
-                    'For Pflegehelfer or nursing assistant, the closest matching programme is the 1-year nursing assistant training. I cannot check live whether a place is still available for 2026; the programme page is the best starting point, and for a binding availability answer please ask directly.'
-                );
-            } else {
-                $answer = $this->phrase(
-                    $reply_language,
-                    'Ob fuer dieses Jahr noch ein Platz frei ist, kann ich nicht live pruefen. Die passende Kursseite ist der beste Einstieg fuer Termine und Bewerbung; fuer eine verbindliche Platz-Auskunft frage bitte direkt nach.',
-                    'I cannot check live whether a place is still available this year. The matching course page is the best starting point for dates and application; for a binding availability answer, please ask directly.'
-                );
-            }
-
-            return $this->intent_result($answer, $sources, 1.2);
-        }
-
+        // Ausland / internationale Bewerbung → AschkeCare (auch ohne expliziten Auslandsbezug im Text)
         if ($this->is_nursing_training_from_abroad_question($text)) {
             $sources = $this->merge_answer_sources($international_sources, $pflegeschule_sources, $contact_sources);
             $answer = $this->phrase(
                 $reply_language,
-                'Wenn du aus dem Ausland eine Pflegeausbildung beginnen moechtest, ist AschkeCare-Connect der passende Einstieg fuer internationale Bewerbungen. Dort geht es um Bewerbung, Sprache und die naechsten Schritte; die allgemeine Kursuebersicht der Pflegeschule zeigt dir zusaetzlich die Ausbildungsangebote.',
-                'If you want to start nursing training from abroad, AschkeCare-Connect is the right starting point for international applications. It covers application, language and next steps; the nursing school course overview also shows the available programmes.'
+                'Fuer internationale Bewerbungen ist AschkeCare-Connect die richtige Anlaufstelle — dort gibt es Hilfe bei Bewerbung, Sprachnachweis und den naechsten Schritten: https://aschkecare-connect.de',
+                'For international applications, AschkeCare-Connect is the right point of contact — it covers application, language requirements and next steps: https://aschkecare-connect.de'
             );
-
             return $this->intent_result($answer, $sources, 1.45);
         }
 
