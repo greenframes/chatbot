@@ -3664,6 +3664,17 @@ class WPCA_Chat_Service
         $behandlungspflege_sources = $this->knowledge_base->find_reference_routes('behandlungspflege weiterbildung', 2, 'training');
         $betreuungskraft_sources = $this->knowledge_base->find_reference_routes('betreuungskraft 43b sgb xi weiterbildung', 2, 'training');
 
+        // Mindestalter / jung / 16 / 17 / Jugendlicher
+        if ($this->text_matches_patterns($text, array('16', '17', 'minderjährig', 'minderjaehrig', 'jung', 'jugendlich', 'jung sein', 'zu jung', 'bin noch jung', 'noch jung', 'alter', 'mindestalter', 'wie alt'), false)
+            && $this->is_training_or_application_request($text)) {
+            $answer = $this->phrase(
+                $reply_language,
+                'Ja, du kannst dich auch mit 16 oder 17 Jahren fuer eine Ausbildung bewerben — ein Mindestalter von 16 Jahren ist in der Pflegeausbildung grundsaetzlich moeglich. Die genauen Zugangsvoraussetzungen (z.B. welcher Schulabschluss noetig ist) findest du auf der Ausbildungsseite. Am besten fragst du direkt bei uns nach, damit wir die Situation fuer dich klaeren koennen.',
+                'Yes, you can apply for training at 16 or 17 — a minimum age of 16 is generally possible in nursing training. The exact entry requirements (e.g. which school leaving certificate is needed) are on the training page. It is best to ask us directly so we can clarify your situation.'
+            );
+            return $this->intent_result($answer, $this->merge_answer_sources($pflegeschule_sources, $contact_sources), 1.4);
+        }
+
         // Verkuerzte Ausbildung nach PFA-Abschluss
         if ($this->text_matches_patterns($text, array('verkuerzt', 'verkürzt', 'angerechnet', 'anrechnung', 'anerkannt', 'zeitverkuerz', 'direkt einsteigen', 'direkt in die', 'nach der pflegefachassistenz', 'nach abschluss', 'nach dem abschluss'), false)
             && $this->text_matches_patterns($text, array('pflegefachkraft', 'pflegefachmann', 'pflegefachfrau', 'pflegefachassistenz', 'pfa', 'ausbildung'), false)) {
@@ -3762,12 +3773,22 @@ class WPCA_Chat_Service
             return $this->intent_result($answer, $contact_sources, 1.2);
         }
 
+        // Kontaktnummer / Telefon direkt anfragen
+        if ($this->text_matches_patterns($text, array('telefon', 'telefonnummer', 'nummer', 'anrufen', 'call', 'phone', 'tel.', 'handynummer', 'mobilnummer', 'whatsapp'), false)) {
+            $answer = $this->phrase(
+                $reply_language,
+                'Die Telefonnummer und alle weiteren Kontaktdaten findest du direkt auf unserer Kontaktseite.',
+                'You can find the phone number and all other contact details directly on our contact page.'
+            );
+            return $this->intent_result($answer, $contact_sources, 1.4);
+        }
+
         // Ansprechpartner / Kontaktperson / "wer ist zustaendig"
         if ($this->text_matches_patterns($text, array('ansprechpartner', 'ansprechpartnerin', 'ansprechperson', 'zustaendig', 'wer ist zustandig', 'wer ist verantwortlich', 'wer hilft', 'wer kann helfen', 'wer ist da', 'wen kann ich fragen', 'wen soll ich kontaktieren', 'wer bearbeitet', 'wer kuemmert', 'kontaktperson', 'who is responsible', 'who should i contact', 'who can help', 'dame mit der nummer'), false)) {
             $answer = $this->phrase(
                 $reply_language,
-                'Fuer alle Fragen rund um Ausbildung, Bewerbung und Kurse erreichst du unser Team direkt ueber das Kontaktformular auf der Website oder telefonisch. Die passenden Kontaktdaten findest du hier.',
-                'For all questions about training, applications and courses you can reach our team directly via the contact form on the website or by phone. You can find the contact details here.'
+                'Fuer alle Fragen rund um Ausbildung, Bewerbung und Kurse erreichst du unser Team direkt telefonisch oder ueber das Kontaktformular. Die Nummer und alle Kontaktdaten findest du hier.',
+                'For all questions about training, applications and courses you can reach our team by phone or via the contact form. The number and all contact details are here.'
             );
             return $this->intent_result($answer, $contact_sources, 1.5);
         }
