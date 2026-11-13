@@ -3737,15 +3737,13 @@ class WPCA_Chat_Service
             return $this->intent_result($answer, $answer_sources, 1.4);
         }
 
-        if ($this->text_matches_patterns($text, array('tagungsraum', 'tagungsraeume', 'seminarraum', 'seminarraeume', 'konferenzraum', 'veranstaltungsraum', 'raummiete', 'raum buchen', 'raeume buchen', 'raum mieten', 'raeume mieten', 'alte schraubenfabrik', 'schraubenfabrik', 'gesundheitscampus'), false)) {
-            $is_campus = $this->text_matches_patterns($text, array('gesundheitscampus', 'campus'), false);
+        if ($this->text_matches_patterns($text, array('tagungsraum', 'tagungsraeume', 'seminarraum', 'seminarraeume', 'konferenzraum', 'veranstaltungsraum', 'raummiete', 'raum buchen', 'raeume buchen', 'raum mieten', 'raeume mieten', 'alte schraubenfabrik', 'schraubenfabrik', 'hotel', 'uebernachtung', 'zimmer', 'cafe', 'restaurant', 'hochzeit', 'trauung', 'eventlocation'), false)) {
             $answer = $this->phrase(
                 $reply_language,
-                'Tagungsraeume und Seminarraeume findest du in der Alten Schraubenfabrik Hagen — alle Infos und die Buchungsmoeglichkeit gibt es direkt hier: https://aschke-seminare.de/' . ($is_campus ? 'gesundheitscampus-hagen/' : 'gesundheitscampus-hagen/'),
-                'Conference and seminar rooms are available at the Alte Schraubenfabrik Hagen — all information and booking options are here: https://aschke-seminare.de/gesundheitscampus-hagen/'
+                'Informationen dazu finden Sie auf der Website der Alten Schraubenfabrik: https://www.alte-schraubenfabrik.de/',
+                'You can find information about this on the Alte Schraubenfabrik website: https://www.alte-schraubenfabrik.de/'
             );
-            $room_sources = $this->knowledge_base->find_reference_routes('gesundheitscampus tagungsraum', 2, 'page');
-            return $this->intent_result($answer, $room_sources, 1.4);
+            return $this->intent_result($answer, array(), 1.4);
         }
 
         // Ausland / internationale Bewerbung → AschkeCare (auch ohne expliziten Auslandsbezug im Text)
