@@ -23,6 +23,7 @@ class WPCA_Admin
         add_action('admin_post_wpca_delete_selected_faqs', array($this, 'handle_delete_selected_faqs'));
         add_action('admin_post_wpca_delete_imported_faqs', array($this, 'handle_delete_imported_faqs'));
         add_action('admin_post_wpca_sync_content', array($this, 'handle_sync_content'));
+        add_action('admin_post_wpca_clear_index', array($this, 'handle_clear_index'));
         add_action('admin_post_wpca_promote_log_to_faq', array($this, 'handle_promote_log_to_faq'));
         add_action('admin_post_wpca_apply_log_keywords', array($this, 'handle_apply_log_keywords'));
         add_action('admin_post_wpca_ignore_log', array($this, 'handle_ignore_log'));
@@ -244,6 +245,11 @@ class WPCA_Admin
                         <input type="hidden" name="action" value="wpca_sync_content">
                         <?php wp_nonce_field('wpca_sync_content'); ?>
                         <?php submit_button('Jetzt Website neu indexieren', 'secondary'); ?>
+                    </form>
+                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin-top:8px;" onsubmit="return confirm('Alle indizierten Inhalte wirklich löschen? Der Bot hat danach kein Wissen mehr bis zum nächsten Sync.');">
+                        <input type="hidden" name="action" value="wpca_clear_index">
+                        <?php wp_nonce_field('wpca_clear_index'); ?>
+                        <?php submit_button('Index leeren (alle Inhalte löschen)', 'delete small'); ?>
                     </form>
                 </section>
             </div>
@@ -647,6 +653,25 @@ class WPCA_Admin
             add_query_arg(
                 'wpca_notice',
                 sprintf('Synchronisierung abgeschlossen: %d Inhalte, %d Wissensbausteine.', (int) $result['indexed_posts'], (int) $result['created_chunks']),
+                admin_url('admin.php?page=wpca-chatbot')
+            )
+        );
+        exit;
+    }
+
+    public function handle_clear_index()
+    {
+        if (! current_user_can('manage_options')) {
+            wp_die('Nicht erlaubt');
+        }
+
+        check_admin_referer('wpca_clear_index');
+        $this->knowledge_base->clear_index();
+
+        wp_safe_redirect(
+            add_query_arg(
+                'wpca_notice',
+                'Index geleert. Bitte jetzt neu synchronisieren.',
                 admin_url('admin.php?page=wpca-chatbot')
             )
         );

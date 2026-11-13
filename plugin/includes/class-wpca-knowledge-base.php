@@ -212,6 +212,14 @@ class WPCA_Knowledge_Base
         }
     }
 
+    public function clear_index()
+    {
+        global $wpdb;
+        $this->maybe_create_tables();
+        $wpdb->query("TRUNCATE TABLE {$this->table_chunks()}");
+        delete_transient(self::TRANSIENT_LAST_SYNC);
+    }
+
     public function sync_site_content()
     {
         global $wpdb;
@@ -266,24 +274,7 @@ class WPCA_Knowledge_Base
             }
         }
 
-        if (count($documents) < $this->get_sync_document_limit()) {
-            foreach ($this->get_published_site_documents($this->get_sync_document_limit() - count($documents)) as $document) {
-                if (isset($seen_urls[$document['url']])) {
-                    continue;
-                }
-
-                $documents[] = $document;
-                $seen_urls[$document['url']] = true;
-
-                if (count($documents) >= $this->get_sync_document_limit()) {
-                    break;
-                }
-            }
-        }
-
-        if (empty($documents)) {
-            $documents = $this->get_published_site_documents($this->get_sync_document_limit());
-        }
+        // Kein Fallback auf beliebige WordPress-Seiten — nur konfigurierte URLs und ihre Unterseiten werden indexiert.
 
         $records = array();
         foreach ($documents as $document) {
