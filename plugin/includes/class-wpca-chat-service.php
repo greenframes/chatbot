@@ -225,6 +225,17 @@ class WPCA_Chat_Service
         $international_raw_sources = $this->pick_international_sources($sources, $retrieval_query);
         $international_display_sources = $this->prepare_sources($international_raw_sources);
 
+        if ($this->text_matches_patterns($retrieval_query, array('tagungsraum', 'tagungsraeume', 'seminarraum', 'seminarraeume', 'konferenzraum', 'veranstaltungsraum', 'raummiete', 'raum buchen', 'raeume buchen', 'raum mieten', 'raeume mieten', 'alte schraubenfabrik', 'schraubenfabrik', 'hotel', 'uebernachtung', 'zimmer', 'cafe', 'restaurant', 'hochzeit', 'trauung', 'eventlocation'), false)) {
+            $schrauben_answer = $this->phrase($reply_language, 'Informationen dazu finden Sie auf der Website der Alten Schraubenfabrik: https://www.alte-schraubenfabrik.de/', 'You can find information about this on the Alte Schraubenfabrik website: https://www.alte-schraubenfabrik.de/');
+            $this->knowledge_base->log_chat($user_question, $schrauben_answer, array(), $best_score);
+
+            return array(
+                'answer' => $schrauben_answer,
+                'sources' => array(),
+                'confidence' => $best_score,
+            );
+        }
+
         if ($is_event_request && ! empty($event_raw_sources)) {
             $event_answer = $this->build_event_answer($retrieval_query, $event_raw_sources, $event_display_sources, $reply_language);
             $this->knowledge_base->log_chat($user_question, $event_answer, $event_raw_sources, $best_score);
