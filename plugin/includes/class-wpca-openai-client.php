@@ -76,6 +76,7 @@ class WPCA_OpenAI_Client
         $payload = array(
             'model' => $model,
             'store' => false,
+            'max_output_tokens' => 350,
             'instructions' => $this->build_instructions($settings, $response_language, $allow_persona_smalltalk),
             'input' => array(
                 array(
